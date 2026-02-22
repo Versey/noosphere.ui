@@ -14,6 +14,10 @@ Noosphere UI is a stylized terminal experience for building idea graphs:
 - keyboard-accelerated editing
 - thematic 40k/Mechanicus interface
 
+## Mind Mapper Screenshot
+
+![Noosphere Mind Mapper Example](docs/images/mind-mapper-example.png)
+
 ## Current Features
 
 ### Mind Mapper
