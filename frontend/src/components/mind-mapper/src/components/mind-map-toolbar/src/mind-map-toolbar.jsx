@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 
 function MindMapToolbar({
   onAddNode,
+  onConnectSelected,
   onUndo,
   onRedo,
   canUndo,
@@ -15,6 +16,9 @@ function MindMapToolbar({
       <button type="button" onClick={onAddNode}>
         Add Node
       </button>
+      <button type="button" disabled={selectedCount < 2} onClick={onConnectSelected}>
+        Connect
+      </button>
       <button type="button" disabled={!canUndo} onClick={onUndo}>
         Undo
       </button>
@@ -23,7 +27,7 @@ function MindMapToolbar({
       </button>
       <p className="mind-mapper-toolbar__selection">{selectedCount} selected</p>
       <p>
-        Shift + drag to multi-select. Drag empty space to pan. Mouse wheel to zoom.
+        Drag empty space to select. Hold Space + drag to pan. Press C to connect selected.
         {connectFromId ? ` Connecting from ${connectFromId}: select target node.` : ''}
       </p>
     </div>
@@ -32,6 +36,7 @@ function MindMapToolbar({
 
 MindMapToolbar.propTypes = {
   onAddNode: PropTypes.func.isRequired,
+  onConnectSelected: PropTypes.func.isRequired,
   onUndo: PropTypes.func.isRequired,
   onRedo: PropTypes.func.isRequired,
   selectedCount: PropTypes.number,

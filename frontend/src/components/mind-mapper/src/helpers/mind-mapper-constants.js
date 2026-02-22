@@ -12,4 +12,11 @@ export const NODE_COLOR_OPTIONS = [
   { key: 'steel', label: 'Steel', border: '#4d6f78', fill: 'rgba(9, 25, 29, 0.9)' }
 ];
 
+export const EDGE_PATTERN_OPTIONS = [
+  { key: 'solid', label: 'Solid' },
+  { key: 'dotted', label: 'Dotted' },
+  { key: 'bold', label: 'Bold' }
+];
+
 export const DEFAULT_NODE_COLOR_KEY = 'emerald';
+export const DEFAULT_EDGE_PATTERN = 'solid';

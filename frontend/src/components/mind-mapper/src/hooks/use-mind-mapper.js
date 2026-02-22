@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
+  EDGE_PATTERN_OPTIONS,
   DEFAULT_NODE_COLOR_KEY,
   MAX_SCALE,
   MIN_SCALE,
@@ -16,6 +17,7 @@ import {
   addNodeProperty,
   addRelativeNode,
   beginConnect,
+  connectSelectedNodes as connectSelectedNodesAction,
   connectToNode,
   createMap as createMapAction,
   deleteEdge as deleteEdgeAction,
@@ -31,6 +33,7 @@ import {
   selectCanRedo,
   selectCanUndo,
   selectMindMapperState,
+  updateEdgeStyle as updateEdgeStyleAction,
   setNodeColor as setNodeColorAction,
   setSelectedNodeId,
   setView,
@@ -46,6 +49,7 @@ const INITIAL_CONTEXT_MENU = {
   worldX: 0,
   worldY: 0,
   nodeId: null,
+  edgeId: null,
   menuType: 'canvas'
 };
 
@@ -80,7 +84,9 @@ function useMindMapper(viewportRef) {
   const canRedo = useSelector(selectCanRedo);
   const [dragState, setDragState] = useState(null);
   const [panState, setPanState] = useState(null);
+  const [isSpacePressed, setIsSpacePressed] = useState(false);
   const [selectedNodeIds, setSelectedNodeIds] = useState([]);
+  const [selectedEdgeId, setSelectedEdgeId] = useState(null);
   const [selectionState, setSelectionState] = useState(null);
   const [suppressCanvasClick, setSuppressCanvasClick] = useState(false);
   const [contextMenu, setContextMenu] = useState(INITIAL_CONTEXT_MENU);
@@ -216,6 +222,15 @@ function useMindMapper(viewportRef) {
     dispatch(connectToNode(targetId));
   }
 
+  function connectSelectedNodes() {
+    if (selectedNodeIds.length < 2) {
+      return;
+    }
+
+    dispatch(connectSelectedNodesAction(selectedNodeIds));
+    closeContextMenu();
+  }
+
   function setNodeColor(nodeId, colorKey) {
     dispatch(setNodeColorAction({ nodeId, colorKey: colorKey || DEFAULT_NODE_COLOR_KEY }));
     closeContextMenu();
@@ -300,6 +315,7 @@ function useMindMapper(viewportRef) {
     event.preventDefault();
     event.stopPropagation();
     pointerGestureRef.current = { startX: event.clientX, startY: event.clientY, moved: false };
+    setSelectedEdgeId(null);
 
     if (event.shiftKey) {
       setSelectedNodeIds((previous) => {
@@ -355,8 +371,9 @@ function useMindMapper(viewportRef) {
     }
 
     pointerGestureRef.current = { startX: event.clientX, startY: event.clientY, moved: false };
+    setSelectedEdgeId(null);
 
-    if (event.shiftKey && viewportRef.current) {
+    if (!isSpacePressed && viewportRef.current) {
       const rect = viewportRef.current.getBoundingClientRect();
       const world = toWorldPoint(event.clientX, event.clientY, rect, editorState.view);
 
@@ -426,6 +443,7 @@ function useMindMapper(viewportRef) {
       worldX: world.x,
       worldY: world.y,
       nodeId: null,
+      edgeId: null,
       menuType: 'canvas'
     });
   }
@@ -439,6 +457,7 @@ function useMindMapper(viewportRef) {
 
     const rect = viewportRef.current.getBoundingClientRect();
     const world = toWorldPoint(event.clientX, event.clientY, rect, editorState.view);
+    setSelectedEdgeId(null);
 
     setContextMenu({
       visible: true,
@@ -447,6 +466,7 @@ function useMindMapper(viewportRef) {
       worldX: world.x,
       worldY: world.y,
       nodeId,
+      edgeId: null,
       menuType: 'node'
     });
 
@@ -458,6 +478,39 @@ function useMindMapper(viewportRef) {
     dispatch(updateNodeText({ nodeId, value }));
   }
 
+  function onEdgeClick(event, edgeId) {
+    event.preventDefault();
+    event.stopPropagation();
+    setSelectedEdgeId(edgeId);
+    closeContextMenu();
+  }
+
+  function onEdgeContextMenu(event, edgeId) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!viewportRef.current) {
+      return;
+    }
+
+    const rect = viewportRef.current.getBoundingClientRect();
+    const world = toWorldPoint(event.clientX, event.clientY, rect, editorState.view);
+    setSelectedEdgeId(edgeId);
+    setSelectedNodeIds([]);
+    dispatch(setSelectedNodeId(null));
+
+    setContextMenu({
+      visible: true,
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top,
+      worldX: world.x,
+      worldY: world.y,
+      nodeId: null,
+      edgeId,
+      menuType: 'edge'
+    });
+  }
+
   function onCanvasClick() {
     if (suppressCanvasClick) {
       setSuppressCanvasClick(false);
@@ -465,12 +518,42 @@ function useMindMapper(viewportRef) {
     }
 
     closeContextMenu();
+    setSelectedEdgeId(null);
     dispatch(setSelectedNodeId(null));
     setSelectedNodeIds([]);
   }
 
   function deleteEdge(edgeId) {
     dispatch(deleteEdgeAction(edgeId));
+    if (selectedEdgeId === edgeId) {
+      setSelectedEdgeId(null);
+    }
+    closeContextMenu();
+  }
+
+  function deleteSelectedEdge() {
+    if (!selectedEdgeId) {
+      return;
+    }
+
+    deleteEdge(selectedEdgeId);
+  }
+
+  function setEdgeColor(edgeId, colorKey) {
+    if (!edgeId) {
+      return;
+    }
+
+    dispatch(updateEdgeStyleAction({ edgeId, colorKey }));
+    closeContextMenu();
+  }
+
+  function setEdgePattern(edgeId, pattern) {
+    if (!edgeId) {
+      return;
+    }
+
+    dispatch(updateEdgeStyleAction({ edgeId, pattern }));
     closeContextMenu();
   }
 
@@ -605,6 +688,40 @@ function useMindMapper(viewportRef) {
 
   useEffect(() => {
     function onKeyDown(event) {
+      if (event.key !== ' ' || isTextInputTarget(event.target)) {
+        return;
+      }
+
+      event.preventDefault();
+      setIsSpacePressed(true);
+    }
+
+    function onKeyUp(event) {
+      if (event.key !== ' ') {
+        return;
+      }
+
+      setIsSpacePressed(false);
+      setPanState(null);
+    }
+
+    function onBlur() {
+      setIsSpacePressed(false);
+      setPanState(null);
+    }
+
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('keyup', onKeyUp);
+    window.addEventListener('blur', onBlur);
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('keyup', onKeyUp);
+      window.removeEventListener('blur', onBlur);
+    };
+  }, []);
+
+  useEffect(() => {
+    function onKeyDown(event) {
       if (isTextInputTarget(event.target)) {
         return;
       }
@@ -623,12 +740,24 @@ function useMindMapper(viewportRef) {
 
       if (event.key === 'Delete') {
         event.preventDefault();
+        if (selectedEdgeId) {
+          deleteSelectedEdge();
+          return;
+        }
+
         requestDeleteSelectedNodes();
+        return;
+      }
+
+      if (!event.ctrlKey && !event.altKey && !event.metaKey && event.key.toLowerCase() === 'c') {
+        event.preventDefault();
+        connectSelectedNodes();
         return;
       }
 
       if (event.key === 'Escape') {
         event.preventDefault();
+        setSelectedEdgeId(null);
         setSelectedNodeIds([]);
         setSelectionState(null);
         dispatch(setSelectedNodeId(null));
@@ -641,11 +770,12 @@ function useMindMapper(viewportRef) {
     return () => {
       window.removeEventListener('keydown', onKeyDown);
     };
-  }, [selectedNodeIds, editorState.selectedNodeId, editorState.edges, editorState.connectFromId]);
+  }, [selectedNodeIds, selectedEdgeId, editorState.selectedNodeId, editorState.edges, editorState.connectFromId]);
 
   useEffect(() => {
     setSelectionState(null);
     setSelectedNodeIds([]);
+    setSelectedEdgeId(null);
   }, [activeMapId]);
 
   function cancelConfirmation() {
@@ -659,9 +789,12 @@ function useMindMapper(viewportRef) {
     isDirty,
     nodesById,
     contextMenu,
+    isSpacePressed,
     selectedNodeIds,
+    selectedEdgeId,
     selectionState,
     nodeColors: NODE_COLOR_OPTIONS,
+    edgePatterns: EDGE_PATTERN_OPTIONS,
     confirmation,
     cancelConfirmation,
     addNodeAtViewportCenter,
@@ -670,6 +803,7 @@ function useMindMapper(viewportRef) {
     beginConnect: beginConnectFromNode,
     closeContextMenu,
     connectToNode: connectToNodeById,
+    connectSelectedNodes,
     createMap,
     deleteEdge,
     deleteMap,
@@ -677,6 +811,8 @@ function useMindMapper(viewportRef) {
     onCanvasMouseDown,
     onCanvasWheel,
     onNodeContextMenu,
+    onEdgeClick,
+    onEdgeContextMenu,
     onNodePropertyChange,
     onNodeMouseDown,
     onNodeTextChange,
@@ -684,9 +820,12 @@ function useMindMapper(viewportRef) {
     redo: redoAction,
     renameMap,
     requestDeleteNode,
+    deleteSelectedEdge,
     saveActiveMap,
     selectMap,
     setNodeColor,
+    setEdgeColor,
+    setEdgePattern,
     addNodeProperty: addNodePropertyToNode,
     removeNodeProperty: removeNodePropertyFromNode,
     reorderProperties: reorderNodeProperties,

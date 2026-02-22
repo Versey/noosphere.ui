@@ -1,5 +1,5 @@
 import { createAction, createSlice } from '@reduxjs/toolkit';
-import { DEFAULT_NODE_COLOR_KEY } from '../../components/mind-mapper/src/helpers/mind-mapper-constants';
+import { DEFAULT_EDGE_PATTERN, DEFAULT_NODE_COLOR_KEY } from '../../components/mind-mapper/src/helpers/mind-mapper-constants';
 import {
   cloneMapState,
   createNode,
@@ -65,7 +65,13 @@ function addUniqueEdge(state, from, to) {
     return;
   }
 
-  state.editorState.edges.push({ id: nextEdgeId(state), from, to });
+  state.editorState.edges.push({
+    id: nextEdgeId(state),
+    from,
+    to,
+    colorKey: DEFAULT_NODE_COLOR_KEY,
+    pattern: DEFAULT_EDGE_PATTERN
+  });
 }
 
 const initialState = {
@@ -230,6 +236,27 @@ const mindMapperSlice = createSlice({
       state.editorState.selectedNodeId = targetId;
       state.isDirty = true;
     },
+    connectSelectedNodes(state, action) {
+      const nodeIds = (action.payload || []).filter(Boolean);
+      if (nodeIds.length < 2) {
+        return;
+      }
+
+      const existingIds = new Set(state.editorState.nodes.map((node) => node.id));
+      const validIds = nodeIds.filter((id) => existingIds.has(id));
+      if (validIds.length < 2) {
+        return;
+      }
+
+      pushHistory(state);
+      const sourceId = validIds[0];
+      validIds.slice(1).forEach((targetId) => {
+        addUniqueEdge(state, sourceId, targetId);
+      });
+      state.editorState.connectFromId = null;
+      state.editorState.selectedNodeId = sourceId;
+      state.isDirty = true;
+    },
     setNodeColor(state, action) {
       const { nodeId, colorKey } = action.payload;
       const targetNode = state.editorState.nodes.find((node) => node.id === nodeId);
@@ -255,6 +282,23 @@ const mindMapperSlice = createSlice({
     deleteEdge(state, action) {
       const edgeId = action.payload;
       state.editorState.edges = state.editorState.edges.filter((edge) => edge.id !== edgeId);
+      state.isDirty = true;
+    },
+    updateEdgeStyle(state, action) {
+      const { edgeId, colorKey, pattern } = action.payload;
+      const targetEdge = state.editorState.edges.find((edge) => edge.id === edgeId);
+      if (!targetEdge) {
+        return;
+      }
+
+      if (colorKey) {
+        targetEdge.colorKey = colorKey;
+      }
+
+      if (pattern) {
+        targetEdge.pattern = pattern;
+      }
+
       state.isDirty = true;
     },
     updateNodeText(state, action) {
@@ -369,9 +413,11 @@ export const {
   addRelativeNode,
   beginConnect,
   connectToNode,
+  connectSelectedNodes,
   setNodeColor,
   deleteNode,
   deleteEdge,
+  updateEdgeStyle,
   updateNodeText,
   addNodeProperty,
   updateNodeProperty,

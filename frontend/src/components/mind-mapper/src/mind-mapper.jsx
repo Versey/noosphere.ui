@@ -28,23 +28,28 @@ function MindMapper() {
     isDirty,
     nodesById,
     contextMenu,
+    isSpacePressed,
     selectedNodeIds,
+    selectedEdgeId,
     selectionState,
     nodeColors,
+    edgePatterns,
     confirmation,
     cancelConfirmation,
     addNodeAtViewportCenter,
     addNodeAtPosition,
     addRelativeNode,
     beginConnect,
+    connectSelectedNodes,
     connectToNode,
     createMap,
-    deleteEdge,
     deleteMap,
     onCanvasContextMenu,
     onCanvasClick,
     onCanvasMouseDown,
     onCanvasWheel,
+    onEdgeClick,
+    onEdgeContextMenu,
     onNodeContextMenu,
     onNodeMouseDown,
     onNodePropertyChange,
@@ -52,9 +57,12 @@ function MindMapper() {
     redo,
     renameMap,
     requestDeleteNode,
+    deleteSelectedEdge,
     saveActiveMap,
     selectMap,
     setNodeColor,
+    setEdgeColor,
+    setEdgePattern,
     addNodeProperty,
     removeNodeProperty,
     reorderProperties,
@@ -84,6 +92,7 @@ function MindMapper() {
             <div className="mind-mapper-canvas">
               <MindMapToolbar
                 onAddNode={addNodeAtViewportCenter}
+                onConnectSelected={connectSelectedNodes}
                 onUndo={undo}
                 onRedo={redo}
                 canUndo={canUndo}
@@ -94,7 +103,7 @@ function MindMapper() {
 
               <div
                 ref={viewportRef}
-                className="mind-mapper-viewport"
+                className={`mind-mapper-viewport ${isSpacePressed ? 'is-space-pan' : ''}`.trim()}
                 onMouseDown={onCanvasMouseDown}
                 onContextMenu={onCanvasContextMenu}
                 onWheel={onCanvasWheel}
@@ -122,20 +131,33 @@ function MindMapper() {
 
                       const fromCenter = toCenterPoint(fromNode, NODE_WIDTH, NODE_HEIGHT, CANVAS_OFFSET);
                       const toCenter = toCenterPoint(toNode, NODE_WIDTH, NODE_HEIGHT, CANVAS_OFFSET);
+                      const edgeColor = nodeColors.find((color) => color.key === edge.colorKey) || nodeColors[0];
+                      const edgePattern = edge.pattern || 'solid';
+                      const classes = ['mind-mapper-edge', `mind-mapper-edge--${edgePattern}`];
+                      if (selectedEdgeId === edge.id) {
+                        classes.push('is-selected');
+                      }
 
                       return (
-                        <line
-                          key={edge.id}
-                          className="mind-mapper-edge"
-                          x1={fromCenter.x}
-                          y1={fromCenter.y}
-                          x2={toCenter.x}
-                          y2={toCenter.y}
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            deleteEdge(edge.id);
-                          }}
-                        />
+                        <g key={edge.id}>
+                          <line
+                            className={classes.join(' ')}
+                            style={{ stroke: edgeColor.border }}
+                            x1={fromCenter.x}
+                            y1={fromCenter.y}
+                            x2={toCenter.x}
+                            y2={toCenter.y}
+                          />
+                          <line
+                            className="mind-mapper-edge-hit"
+                            x1={fromCenter.x}
+                            y1={fromCenter.y}
+                            x2={toCenter.x}
+                            y2={toCenter.y}
+                            onClick={(event) => onEdgeClick(event, edge.id)}
+                            onContextMenu={(event) => onEdgeContextMenu(event, edge.id)}
+                          />
+                        </g>
                       );
                     })}
                   </svg>
@@ -188,6 +210,7 @@ function MindMapper() {
                   x={contextMenu.x}
                   y={contextMenu.y}
                   colorOptions={nodeColors}
+                  patternOptions={edgePatterns}
                   onAddNode={() => addNodeAtPosition(contextMenu.worldX, contextMenu.worldY)}
                   onAddParent={() => addRelativeNode('parent', contextMenu.nodeId)}
                   onAddChild={() => addRelativeNode('child', contextMenu.nodeId)}
@@ -195,6 +218,9 @@ function MindMapper() {
                   onConnect={() => beginConnect(contextMenu.nodeId)}
                   onDelete={() => requestDeleteNode(contextMenu.nodeId)}
                   onColorChange={(colorKey) => setNodeColor(contextMenu.nodeId, colorKey)}
+                  onEdgeColorChange={(colorKey) => setEdgeColor(contextMenu.edgeId, colorKey)}
+                  onEdgePatternChange={(pattern) => setEdgePattern(contextMenu.edgeId, pattern)}
+                  onEdgeDelete={deleteSelectedEdge}
                 />
               </div>
             </div>

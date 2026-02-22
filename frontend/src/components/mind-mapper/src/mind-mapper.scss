@@ -200,21 +200,17 @@
   border: 1px solid var(--mech-line);
   background: rgba(0, 12, 8, 0.8);
   overflow: hidden;
-  cursor: grab;
+  cursor: default;
   user-select: none;
   touch-action: none;
 }
 
-.mind-mapper-viewport:active {
+.mind-mapper-viewport.is-space-pan {
+  cursor: grab;
+}
+
+.mind-mapper-viewport.is-space-pan:active {
   cursor: grabbing;
-}
-
-.mind-mapper-viewport.is-multi-select {
-  cursor: crosshair;
-}
-
-.mind-mapper-viewport.is-multi-select:active {
-  cursor: crosshair;
 }
 
 .mind-mapper-world {
@@ -227,19 +223,36 @@
   position: absolute;
   left: -4000px;
   top: -4000px;
-  pointer-events: none;
+  pointer-events: auto;
 }
 
-.mind-mapper-edges line {
+.mind-mapper-edge {
+  pointer-events: none;
   stroke: rgba(68, 255, 159, 0.72);
   stroke-width: 2;
 }
 
-.mind-mapper-edge {
+.mind-mapper-edge--dotted {
+  stroke-dasharray: 6 6;
+}
+
+.mind-mapper-edge--bold {
+  stroke-width: 4;
+}
+
+.mind-mapper-edge.is-selected {
+  stroke: var(--mech-gold) !important;
+  filter: drop-shadow(0 0 3px rgba(209, 168, 66, 0.6));
+}
+
+.mind-mapper-edge-hit {
+  pointer-events: stroke;
+  stroke: transparent;
+  stroke-width: 14;
   cursor: pointer;
 }
 
-.mind-mapper-edge:hover {
+.mind-mapper-edges g:hover .mind-mapper-edge {
   stroke: #ff8e8e;
 }
 
