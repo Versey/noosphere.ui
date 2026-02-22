@@ -1,0 +1,61 @@
+.mech-topbar {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.65rem 0.95rem;
+  border-bottom: 1px solid var(--mech-line);
+  background:
+    linear-gradient(90deg, rgba(34, 42, 24, 0.94), rgba(15, 19, 11, 0.96)),
+    radial-gradient(circle at 7% 5%, rgba(111, 69, 31, 0.2), transparent 34%);
+  box-shadow:
+    inset 0 -1px 0 rgba(150, 177, 84, 0.18),
+    inset 0 1px 0 rgba(164, 111, 52, 0.18);
+}
+
+.mech-topbar__left,
+.mech-topbar__right {
+  display: flex;
+  align-items: center;
+}
+
+.mech-topbar__sigil {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.2rem;
+  min-width: 3.2rem;
+}
+
+.mech-topbar__center {
+  justify-self: center;
+  min-width: 0;
+  text-align: center;
+}
+
+.mech-topbar__strap {
+  display: inline-block;
+  margin: 0 0 0.35rem;
+  padding: 0.2rem 0.6rem;
+  border: 1px solid rgba(121, 145, 67, 0.75);
+  background: rgba(26, 33, 19, 0.9);
+  color: var(--mech-soft);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.mech-topbar__titles h1 {
+  margin: 0;
+  font-size: 1.02rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.mech-topbar__titles p {
+  margin: 0.16rem 0 0;
+  font-size: 0.68rem;
+  color: var(--mech-soft);
+  text-transform: uppercase;
+}

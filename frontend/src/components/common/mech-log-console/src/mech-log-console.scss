@@ -1,0 +1,17 @@
+.mech-log-console {
+  border: 1px solid var(--mech-line);
+  background:
+    linear-gradient(180deg, rgba(19, 24, 14, 0.88), rgba(14, 18, 11, 0.92)),
+    radial-gradient(circle at 0% 100%, rgba(82, 49, 22, 0.17), transparent 33%);
+  min-height: 180px;
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+.mech-log-console p {
+  margin: 0 0 0.9rem;
+  color: var(--mech-soft);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}

@@ -1,0 +1,69 @@
+.mech-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 300;
+}
+
+.mech-modal {
+  width: min(460px, 92vw);
+  border: 1px solid var(--mech-line);
+  background: rgba(0, 20, 12, 0.98);
+  box-shadow: 0 0 18px rgba(0, 0, 0, 0.8);
+}
+
+.mech-modal__header,
+.mech-modal__body,
+.mech-modal__footer {
+  padding: 0.75rem;
+}
+
+.mech-modal__header {
+  border-bottom: 1px solid var(--mech-line);
+}
+
+.mech-modal__header h3 {
+  margin: 0;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  color: var(--mech-soft);
+}
+
+.mech-modal__body p {
+  margin: 0;
+  font-size: 0.8rem;
+}
+
+.mech-modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  border-top: 1px solid rgba(15, 123, 73, 0.6);
+}
+
+.mech-modal__button {
+  border: 1px solid var(--mech-line);
+  background: rgba(0, 34, 21, 0.9);
+  color: var(--mech-bright);
+  font-family: inherit;
+  font-size: 0.76rem;
+  padding: 0.35rem 0.6rem;
+  cursor: pointer;
+}
+
+.mech-modal__button--danger {
+  border-color: #9d2f2f;
+  color: #ff7979;
+}
+
+.mech-modal__button--secondary {
+  border-color: #55726a;
+  color: #b2c7bf;
+}
+
+.mech-modal__button--primary {
+  border-color: var(--mech-line);
+}

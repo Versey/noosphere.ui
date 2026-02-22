@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Noosphere Mechanicus Icon">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#01150d" />
+      <stop offset="100%" stop-color="#000804" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)" />
+  <circle cx="256" cy="256" r="168" fill="none" stroke="#2bff8f" stroke-opacity="0.35" stroke-width="34" />
+  <path d="M256 88a168 168 0 0 1 0 336v-52a116 116 0 0 0 0-232z" fill="#2bff8f" />
+  <path d="M256 154c-52 0-86 36-86 84 0 30 17 56 44 71v42h84v-42c27-15 44-41 44-71 0-48-34-84-86-84z" fill="#2bff8f" />
+  <circle cx="228" cy="250" r="16" fill="#001108" />
+  <circle cx="284" cy="250" r="16" fill="#001108" />
+  <rect x="244" y="283" width="24" height="20" fill="#001108" />
+  <g opacity="0.3">
+    <rect y="96" width="512" height="8" fill="#001108" />
+    <rect y="128" width="512" height="8" fill="#001108" />
+    <rect y="160" width="512" height="8" fill="#001108" />
+    <rect y="192" width="512" height="8" fill="#001108" />
+    <rect y="224" width="512" height="8" fill="#001108" />
+    <rect y="256" width="512" height="8" fill="#001108" />
+    <rect y="288" width="512" height="8" fill="#001108" />
+    <rect y="320" width="512" height="8" fill="#001108" />
+    <rect y="352" width="512" height="8" fill="#001108" />
+    <rect y="384" width="512" height="8" fill="#001108" />
+  </g>
+</svg>

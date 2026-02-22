@@ -1,0 +1,25 @@
+.mech-command-input {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  border: 1px solid var(--mech-line);
+  border-top: 0;
+  background: linear-gradient(180deg, rgba(20, 26, 15, 0.92), rgba(14, 18, 11, 0.95));
+  padding: 0.6rem 0.7rem;
+}
+
+.mech-command-input span {
+  color: var(--mech-gold);
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.mech-command-input input {
+  width: 100%;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--mech-bright);
+  font-family: inherit;
+  font-size: 0.8rem;
+}
